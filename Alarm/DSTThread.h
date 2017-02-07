@@ -3,24 +3,26 @@
 #include <OneWire.h>
 OneWire oneWire(ONE_WIRE_BUS);
 
-byte dstAddr[8];
+byte dstAddress[8];
 
 bool dst_search(OneWire* wire, uint8_t* addr) {
   // while ?
   if ( !wire->search(addr)) {
-    // No more addresses.
-    wire->reset_search();
-    delay(250);
+    wire->reset_search(); // No more addresses.
     return false;
   }
 
   if (OneWire::crc8(addr, 7) != addr[7]) {
-      // CRC is not valid
-      return false;
+    return false; // CRC is not valid
   }
+
+//  if (addr[0] != 0x10 && addr[0] != 0x28 && addr[0] != 0x22) {
+//    return false; // Device is not recognized
+//  }
   return true;
 }
 
+//sprintf(str, "String value: %d.%02d", (int)f, (int)(f*100)%100);
 int8_t dst_getTemp(OneWire* wire, const uint8_t *addr) {
   byte type_s;
   byte data[2]; //byte data[12];

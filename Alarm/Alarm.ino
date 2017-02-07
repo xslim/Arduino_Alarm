@@ -40,7 +40,7 @@ void setup() {
 //#ifdef DEBUG
   Serial.begin(115200);
 //#endif
-  DEBUG_PRINTLN("Initializing");
+ // DEBUG_PRINTLN("Initializing");
 
 #if DISPLAY_ENABLED
   pinMode(BUTTON_A, INPUT_PULLUP);
@@ -72,7 +72,7 @@ void setup() {
     controller.add(&rfidThread);
 #endif
 
-  DEBUG_PRINTLN("Running");
+//  DEBUG_PRINTLN("Running");
   delay(500);
 }
 

@@ -1,7 +1,10 @@
 #if DHT_ENABLED
 
-#include <DHT.h>
-DHT dht(DHT_PIN, DHT_TYPE);
+//#include <DHT.h>
+//DHT dht(DHT_PIN, DHT_TYPE);
+
+#include "dht.h"
+dht DHT;
 
 #include "DSTThread.h"
 
@@ -11,9 +14,14 @@ public:
   void readDHT() {
     // Reading temperature or humidity takes about 250 milliseconds!
     // Sensor readings may also be up to 2 seconds 'old' (its a very slow sensor)
+
+    DHT.read22(DHT_PIN);
     
-    float h = dht.readHumidity();
-    float t = dht.readTemperature();
+//    float h = dht.readHumidity();
+//    float t = dht.readTemperature();
+
+    float h = DHT.humidity;
+    float t = DHT.temperature;
     
     // Check if any reads failed and exit early (to try again).
     if (isnan(h) || isnan(t)) {
@@ -21,7 +29,7 @@ public:
       return;
     }
 
-    DEBUG_PRINTLN("T: " + String(t) + "C H: " + String(h) + "%");
+//    DEBUG_PRINTLN("T: " + String(t) + "C H: " + String(h) + "%");
     sensorData.hum = (int)h;
     sensorData.temp = (int)t;
   
@@ -30,13 +38,13 @@ public:
   }
 
   void readDST(){
-    int16_t t = dst_getTemp(&oneWire, dstAddr);
+    int16_t t = dst_getTemp(&oneWire, dstAddress);
     
     if (t < -100) {
       Serial.println("Failed to read from DST sensor: " + String(t));
       return;
     }
-    DEBUG_PRINTLN("T2: " + String(t) + "C");
+//    DEBUG_PRINTLN("T2: " + String(t) + "C");
     sensorData.outTemp = (int)t;
   }
 
@@ -52,11 +60,11 @@ public:
   }
 
   void setup(){
-    dht.begin();                  // temperature and humidity
+    //dht.begin();                  // temperature and humidity
 
     //dst.begin();
     //if (!dst.getAddress(dstAddress, 0)) Serial.println("Unable to find address for Device 0"); 
-    dst_search(&oneWire, dstAddr);
+    dst_search(&oneWire, dstAddress);
   }
 };
 

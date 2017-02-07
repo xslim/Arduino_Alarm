@@ -3,21 +3,19 @@
 
 typedef struct tSensorData {
 
-  int temp, outTemp, hum;
-  int uploaded;
-  String lastCard;
+  int8_t temp, outTemp;
+  uint8_t hum;
+  uint8_t batt;
   bool locked;
-  float batt;
+  
 
 public:
   tSensorData() {
     temp     = 0;
     outTemp  = 0;
     hum      = 0;
-    uploaded = -1;
-    lastCard = "";
+    batt     = 0;
     locked   = false;
-    batt = 0.0;
   };
 };
 
