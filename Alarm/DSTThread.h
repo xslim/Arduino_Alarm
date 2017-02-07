@@ -5,7 +5,7 @@ OneWire oneWire(ONE_WIRE_BUS);
 
 byte dstAddr[8];
 
-bool dst_search(OneWire* wire, const uint8_t* addr) {
+bool dst_search(OneWire* wire, uint8_t* addr) {
   // while ?
   if ( !wire->search(addr)) {
     // No more addresses.
