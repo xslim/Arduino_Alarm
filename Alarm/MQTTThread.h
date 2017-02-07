@@ -58,8 +58,8 @@ public:
   }
 
   void getBattVoltage() {
-    uint16_t v = gsmModem.getBattVoltage();
-    sensorData.batt = v/1000.0;
+    //uint16_t v = gsmModem.getBattVoltage();
+    //sensorData.batt = v/1000.0;
   }
 
   void reconnect() {

@@ -1,19 +1,12 @@
 #if DHT_ENABLED
 
 #include <DHT.h>
-
-#include <OneWire.h>
-#include <DallasTemperature.h>
-
 DHT dht(DHT_PIN, DHT_TYPE);
 
-OneWire oneWire(ONE_WIRE_BUS);
-DallasTemperature dst(&oneWire);
+#include "DSTThread.h"
 
 class DHTThread: public Thread {
 public:
-
-  DeviceAddress dstAddress;
 
   void readDHT() {
     // Reading temperature or humidity takes about 250 milliseconds!
@@ -37,8 +30,7 @@ public:
   }
 
   void readDST(){
-    //float t = dst.getTempCByIndex(0);
-    float t = dst.getTempC(dstAddress);
+    int16_t t = dst_getTemp(&oneWire, dstAddr);
     
     if (t < -100) {
       Serial.println("Failed to read from DST sensor: " + String(t));
@@ -62,8 +54,9 @@ public:
   void setup(){
     dht.begin();                  // temperature and humidity
 
-    dst.begin();
-    if (!dst.getAddress(dstAddress, 0)) Serial.println("Unable to find address for Device 0"); 
+    //dst.begin();
+    //if (!dst.getAddress(dstAddress, 0)) Serial.println("Unable to find address for Device 0"); 
+    dst_search(&oneWire, dstAddr);
   }
 };
 

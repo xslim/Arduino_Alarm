@@ -5,9 +5,10 @@
 
 //#define DEBUG
 
-#define DISPLAY_ENABLED 1
+#define DISPLAY_ENABLED 0
 #define RFID_ENABLED 0
 #define DHT_ENABLED 1
+#define DST_ENABLED 1
 
 
 #define MQTT_ENABLED 1
@@ -22,7 +23,10 @@
 #define MQTT_SERVER "mqtt.thingspeak.com"
 #define MQTT_POSTING_INTERVAL 60000
 #define MQTT_CHANNEL_ID "189404"
-//#define MQTT_CHANNEL_APIKEY ""
+
+#ifndef MQTT_CHANNEL_APIKEY
+#define MQTT_CHANNEL_APIKEY ""
+#endif
 
 //LED_BUILTIN
 #if defined(ESP8266)
@@ -62,14 +66,14 @@
   #define ONE_WIRE_BUS 12
 #endif
 
-#ifdef DEBUG 
- #define DEBUG_PRINT(x)    Serial.print (x)
- #define DEBUG_PRINTDEC(x) Serial.print (x, DEC)
- #define DEBUG_PRINTLN(x)  Serial.println (x)
-#else
- #define DEBUG_PRINT(x)
- #define DEBUG_PRINTDEC(x)
- #define DEBUG_PRINTLN(x) 
-#endif
+//#ifdef DEBUG 
+// #define DEBUG_PRINT(x)    Serial.print (x)
+// #define DEBUG_PRINTDEC(x) Serial.print (x, DEC)
+// #define DEBUG_PRINTLN(x)  Serial.println (x)
+//#else
+// #define DEBUG_PRINT(x)
+// #define DEBUG_PRINTDEC(x)
+// #define DEBUG_PRINTLN(x) 
+//#endif
 
 #endif
