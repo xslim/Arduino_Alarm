@@ -1,6 +1,7 @@
 #include <Arduino.h>
 
-#include "Config.h"
+#include "config.h"
+
 #include "Scheduler.h"
 
 #include "SensorData.h"
@@ -9,27 +10,26 @@ tSensorData sensorData = { 0, 0, 0, 0 };
 String gsmOperator = "";
 
 #if DHT_ENABLED
-#include "DHTThread.h"
+#include "dht_dst.h"
 #endif
 
 #if FONA_ENABLED
-#include "MQTTThread.h"
+#include "fona.h"
+#endif
+
+#if MQTT_ENABLED
+#include "mqtt.h"
 #endif
 
 #if DISPLAY_ENABLED
-#include "Display.h"
+#include "display.h"
 #endif
 
 #if RFID_ENABLED
-#include "RFIDThread.h"
-RFIDThread rfidThread = RFIDThread();
+#include "rfid.h"
 #endif
 
-//ThreadController controller = ThreadController();
-
 void setup() {
-  // put your setup code here, to run once:
-  delay(500);
 
 #ifdef DEBUG
   Serial.begin(115200);
@@ -52,7 +52,8 @@ void setup() {
 
 #if DHT_ENABLED
   setup_dst();
-  scheduler_add(&update_dht_dst, 5000);
+  scheduler_add(&update_dht, 2000);
+  scheduler_add(&update_dst, 2000);
 #endif
 
 #if FONA_ENABLED
@@ -73,7 +74,6 @@ void setup() {
 #endif
 
   DEBUG_PRINTLN("Running");
-  delay(500);
 }
 
 
@@ -83,3 +83,19 @@ void loop() {
 
   scheduler_update(millis());
 }
+
+
+//void sleep_1s() {
+//  //this next bit creates a 1 second WDT delay during the DS18b20 temp conversion
+//  //The time needed between the CONVERT_T command and the READ_SCRATCHPAD command has to be at least
+//  //750 millisecs (but can be shorter if using a D18B20 type with resolutions < 12 bits)
+//  MCUSR = 0; // clear various “reset” flags
+//  WDTCSR = bit (WDCE) | bit (WDE); // allow changes, disable reset
+//  // set interrupt mode and an interval
+//  WDTCSR = bit (WDIE) | bit (WDP2) | bit (WDP1); //a 1 sec timer
+//  wdt_reset(); // pat the dog
+//  set_sleep_mode (SLEEP_MODE_PWR_DOWN);
+//  sleep_enable();
+//  sleep_cpu ();
+//  sleep_disable(); // cancel sleep after wakeup as a precaution
+//}

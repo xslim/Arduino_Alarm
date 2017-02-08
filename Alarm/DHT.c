@@ -1,62 +1,23 @@
-//
-//    FILE: dht.cpp
-//  AUTHOR: Rob Tillaart
-// VERSION: 0.1.21
-// PURPOSE: DHT Temperature & Humidity Sensor library for Arduino
-//     URL: http://arduino.cc/playground/Main/DHTLib
-//
-// HISTORY:
-// 0.1.21 replace delay with delayMicroseconds() + small fix
-// 0.1.20 Reduce footprint by using uint8_t as error codes. (thanks to chaveiro)
-// 0.1.19 masking error for DHT11 - FIXED (thanks Richard for noticing)
-// 0.1.18 version 1.16/17 broke the DHT11 - FIXED
-// 0.1.17 replaced micros() with adaptive loopcount
-//        removed DHTLIB_INVALID_VALUE
-//        added  DHTLIB_ERROR_CONNECT
-//        added  DHTLIB_ERROR_ACK_L  DHTLIB_ERROR_ACK_H
-// 0.1.16 masking unused bits (less errors); refactored bits[]
-// 0.1.15 reduced # micros calls 2->1 in inner loop.
-// 0.1.14 replace digital read with faster (~3x) code => more robust low MHz machines.
-//
-// 0.1.13 fix negative temperature
-// 0.1.12 support DHT33 and DHT44 initial version
-// 0.1.11 renamed DHTLIB_TIMEOUT
-// 0.1.10 optimized faster WAKEUP + TIMEOUT
-// 0.1.09 optimize size: timeout check + use of mask
-// 0.1.08 added formula for timeout based upon clockspeed
-// 0.1.07 added support for DHT21
-// 0.1.06 minimize footprint (2012-12-27)
-// 0.1.05 fixed negative temperature bug (thanks to Roseman)
-// 0.1.04 improved readability of code using DHTLIB_OK in code
-// 0.1.03 added error values for temp and humidity when read failed
-// 0.1.02 added error codes
-// 0.1.01 added support for Arduino 1.0, fixed typos (31/12/2011)
-// 0.1.00 by Rob Tillaart (01/04/2011)
-//
-// inspired by DHT11 library
-//
-// Released to the public domain
-//
 
-#include "dht.h"
+#include "DHT.h"
 
-/////////////////////////////////////////////////////
-//
-// PUBLIC
-//
+#define DHT_INITIALIZED   0x01
+#define DHT_REQUESTED     0x02
 
-int8_t dht::read11(uint8_t pin)
+
+
+int8_t dht_read11(DHT* sensor)
 {
-    // READ VALUES
-    int8_t result = _readSensor(pin, DHTLIB_DHT11_WAKEUP, DHTLIB_DHT11_LEADING_ZEROS);
+  uint8_t bits[5] = {0};;
+  int8_t result = dht_readSensor(sensor->pin, DHTLIB_DHT11_WAKEUP, DHTLIB_DHT11_LEADING_ZEROS, &bits);
 
     // these bits are always zero, masking them reduces errors.
     bits[0] &= 0x7F;
     bits[2] &= 0x7F;
 
     // CONVERT AND STORE
-    humidity    = bits[0];  // bits[1] == 0;
-    temperature = bits[2];  // bits[3] == 0;
+    sensor->humidity    = bits[0];  // bits[1] == 0;
+    sensor->temperature = bits[2];  // bits[3] == 0;
 
     // TEST CHECKSUM
     // bits[1] && bits[3] both 0
@@ -68,21 +29,21 @@ int8_t dht::read11(uint8_t pin)
     return result;
 }
 
-int8_t dht::read(uint8_t pin)
+int8_t dht_read22(DHT* sensor)
 {
-    // READ VALUES
-    int8_t result = _readSensor(pin, DHTLIB_DHT_WAKEUP, DHTLIB_DHT_LEADING_ZEROS);
+    uint8_t bits[5] = {0};
+    int8_t result = dht_readSensor(sensor->pin, DHTLIB_DHT_WAKEUP, DHTLIB_DHT_LEADING_ZEROS, &bits);
 
     // these bits are always zero, masking them reduces errors.
     bits[0] &= 0x03;
     bits[2] &= 0x83;
 
     // CONVERT AND STORE
-    humidity = (bits[0]*256 + bits[1]) /10;
-    temperature = ((bits[2] & 0x7F)*256 + bits[3]) /10;
+    sensor->humidity = (bits[0]*256 + bits[1]) /10;
+    sensor->temperature = ((bits[2] & 0x7F)*256 + bits[3]) /10;
     if (bits[2] & 0x80)  // negative temperature
     {
-        temperature = -temperature;
+        sensor->temperature = - sensor->temperature;
     }
 
     // TEST CHECKSUM
@@ -92,16 +53,13 @@ int8_t dht::read(uint8_t pin)
         return DHTLIB_ERROR_CHECKSUM;
     }
 
+
     //DEBUG_PRINTLN("DHT t "+String(temperature) +" H "+String(humidity) + " r " + String(result));
     return result;
 }
 
-/////////////////////////////////////////////////////
-//
-// PRIVATE
-//
 
-int8_t dht::_readSensor(uint8_t pin, uint8_t wakeupDelay, uint8_t leadingZeroBits)
+int8_t dht_readSensor(uint8_t pin, uint8_t wakeupDelay, uint8_t leadingZeroBits,  uint8_t (*bits)[5])
 {
     // INIT BUFFERVAR TO RECEIVE DATA
     uint8_t mask = 128;
@@ -125,7 +83,9 @@ int8_t dht::_readSensor(uint8_t pin, uint8_t wakeupDelay, uint8_t leadingZeroBit
     // REQUEST SAMPLE
     pinMode(pin, OUTPUT);
     digitalWrite(pin, LOW); // T-be
+    
     delayMicroseconds(wakeupDelay * 1000UL);
+    
     digitalWrite(pin, HIGH); // T-go
     pinMode(pin, INPUT);
 
@@ -173,7 +133,7 @@ int8_t dht::_readSensor(uint8_t pin, uint8_t wakeupDelay, uint8_t leadingZeroBit
             if (mask == 0)   // next byte
             {
                 mask = 128;
-                bits[idx] = data;
+                (*bits)[idx] = data;
                 idx++;
                 data = 0;
             }
@@ -196,6 +156,59 @@ int8_t dht::_readSensor(uint8_t pin, uint8_t wakeupDelay, uint8_t leadingZeroBit
 
     return DHTLIB_OK;
 }
+
+int8_t dht_setup(DHT* sensor, uint8_t pin, uint8_t type) {
+  sensor->pin = pin;
+  sensor->type = type;
+
+//  #ifdef __AVR
+//    sensor->_bit = digitalPinToBitMask(pin);
+//    sensor->_port = digitalPinToPort(pin);
+//  #endif
+//  // set up the pins!
+//  pinMode(_pin, INPUT_PULLUP);
+}
+
+uint16_t dst_request_value(DHT* sensor) {
+//  sensor->state |= DHT_REQUESTED;
 //
-// END OF FILE
-//
+//  // Go into high impedence state to let pull-up raise data line level and
+//  // start the reading process.
+//  digitalWrite(sensor->pin, HIGH);
+//  
+  return 250;
+}
+
+uint8_t dht_read_value(DHT* sensor) {
+  sensor->state &= ~DHT_REQUESTED;
+
+//  *temperature = ;
+    
+  return 0;
+}
+
+int16_t dht_update(DHT* sensor) {
+    
+    if (!(sensor->state & DHT_INITIALIZED)) {
+        return DHTLIB_ERROR_CONNECT;
+    }
+
+    if (sensor->type == DHT11) {
+      return dht_read11(sensor);
+    } else if (sensor->type == DHT22) {
+      return dht_read22(sensor);
+    }
+    return DHTLIB_ERROR_CONNECT;
+    
+//    if (sensor->state & DHT_REQUESTED) {
+//        dst_read_value(sensor, temperature, humidity);
+//        return 0;
+//    } else {
+//        // Request value
+//        uint16_t timeout = dht_request_value(sensor);
+//        return timeout;
+//    }
+
+  
+    
+}

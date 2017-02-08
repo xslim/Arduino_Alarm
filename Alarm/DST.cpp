@@ -1,7 +1,21 @@
-#include <OneWire.h>
-OneWire oneWire(ONE_WIRE_BUS);
+//
+//  Created by Taras Kalapun on 2/8/17.
+//
+//
 
-byte dstAddress[8];
+#include "DST.h"
+#include <stdlib.h>
+
+#define DST_INITIALIZED		0x01
+#define DST_REQUESTED     0x02
+
+uint8_t dst_setup(DST* sensor, OneWire* wire) {
+  if(dst_search(wire, sensor->address)) {
+    sensor->state = DST_INITIALIZED;
+    return 1;
+  }
+  return 0;
+}
 
 bool dst_search(OneWire* wire, uint8_t* addr) {
   // while ?
@@ -21,11 +35,11 @@ bool dst_search(OneWire* wire, uint8_t* addr) {
 }
 
 
-int8_t dst_getTemp(OneWire* wire, const uint8_t *addr) {
-  byte type_s;
-  byte data[2]; //byte data[12];
-  
+uint16_t dst_request_value(DST* sensor, OneWire* wire) {
+  sensor->state |= DST_REQUESTED;
+   
   // the first ROM byte indicates which chip
+//  byte type_s;
 //  switch (addr[0]) {
 //    case 0x10:
 //      type_s = 1; //DS18S20 or old DS1820
@@ -42,15 +56,20 @@ int8_t dst_getTemp(OneWire* wire, const uint8_t *addr) {
 //  } 
 
   wire->reset();
-  wire->select(addr);
+  wire->select(sensor->address);
   wire->write(0x44); //wire.write(0x44, 1);        // start conversion, with parasite power on at the end
-  
-  delay(800);     // maybe 750ms is enough, maybe not
-  // we might do a ds.depower() here, but the reset will take care of it.
-  
+
+  return 800; // request in x ms
+}
+
+uint8_t dst_read_value(DST* sensor, OneWire* wire, int8_t* temperature) {
+  sensor->state &= ~DST_REQUESTED;
+
   wire->reset();
-  wire->select(addr);    
+  wire->select(sensor->address);    
   wire->write(0xBE);         // Read Scratchpad
+
+  byte data[2]; //byte data[12];
 
 //  for ( i = 0; i < 9; i++) {           // we need 9 bytes
 //    data[i] = wire.read();
@@ -86,21 +105,25 @@ int8_t dst_getTemp(OneWire* wire, const uint8_t *addr) {
 
   //celsius = (float)raw / 16.0;
   //DEBUG_PRINTLN("DST raw "+String(raw));
-  return raw / 16;
+  
+  *temperature = raw / 16;
+    
+  return 0;
 }
 
-void sleep_1s() {
-//  //this next bit creates a 1 second WDT delay during the DS18b20 temp conversion
-//  //The time needed between the CONVERT_T command and the READ_SCRATCHPAD command has to be at least
-//  //750 millisecs (but can be shorter if using a D18B20 type with resolutions < 12 bits)
-//  MCUSR = 0; // clear various “reset” flags
-//  WDTCSR = bit (WDCE) | bit (WDE); // allow changes, disable reset
-//  // set interrupt mode and an interval
-//  WDTCSR = bit (WDIE) | bit (WDP2) | bit (WDP1); //a 1 sec timer
-//  wdt_reset(); // pat the dog
-//  set_sleep_mode (SLEEP_MODE_PWR_DOWN);
-//  sleep_enable();
-//  sleep_cpu ();
-//  sleep_disable(); // cancel sleep after wakeup as a precaution
+uint16_t dst_update(DST* sensor, OneWire* wire, int8_t* temperature) {
+    
+    if (!(sensor->state & DST_INITIALIZED)) {
+        return 0;
+    }
+    
+    if (sensor->state & DST_REQUESTED) {
+        dst_read_value(sensor, wire, temperature);
+        return 0;
+    } else {
+        // Request value
+        uint16_t timeout = dst_request_value(sensor, wire);
+        return timeout;
+    }
+    
 }
-

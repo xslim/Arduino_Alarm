@@ -3,7 +3,7 @@
 
 #include "private.h"
 
-//#define DEBUG
+#define DEBUG
 
 #define DISPLAY_ENABLED 1
 #define RFID_ENABLED 0

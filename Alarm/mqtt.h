@@ -1,52 +1,8 @@
 
-#define TINY_GSM_MODEM_SIM800
-#include <TinyGsmClient.h>
-#include <SoftwareSerial.h>
 
-SoftwareSerial fonaSS(FONA_TX, FONA_RX);
-TinyGsm gsmModem(fonaSS);
-TinyGsmClient netClient(gsmModem);
-
-#if MQTT_ENABLED
 #include <PubSubClient.h>
 PubSubClient mqtt(netClient);
-#endif
 
-void update_fona(SchedulerTimer *timer);
-
-void setup_fona(){
-  fonaSS.begin(4800);
-  delay(3000);
-  
-  DEBUG_PRINTLN("Initializing modem...");
-  gsmModem.restart();
-
-  DEBUG_PRINTLN("Waiting for network...");
-  if (!gsmModem.waitForNetwork()) {
-    DEBUG_PRINTLN(" fail");
-    while (true);
-  }
-  DEBUG_PRINTLN(" OK");
-
-  DEBUG_PRINTLN("Connecting to APN");
-  if (!gsmModem.gprsConnect(FONA_APN, FONA_USERNAME, FONA_PASSWORD)) {
-    DEBUG_PRINTLN(" fail");
-    while (true);
-  }
-  DEBUG_PRINTLN(" OK");
-  
-  update_fona(NULL);
-}
-
-void update_fona(SchedulerTimer *timer) {
-  gsmOperator = gsmModem.getOperator();
-  //sensorData.batt = gsmModem.getBattVoltage() / 100;
-  
-  DEBUG_PRINTLN(gsmOperator);
-  DEBUG_PRINTLN(sensorData.batt);
-}
-
-#if MQTT_ENABLED
 void mqtt_reconnect();
 void mqtt_publish();
 
@@ -79,7 +35,6 @@ void mqtt_reconnect() {
       // Print to know why the connection failed
       // See http://pubsubclient.knolleary.net/api.html#state for the failure code and its reason
       DEBUG_PRINTLN(mqtt.state());
-      DEBUG_PRINTLN(" try again in 5 seconds");
       // Wait 5 seconds before retrying to connect again
       delay(5000);
     }
@@ -100,4 +55,3 @@ void mqtt_publish() {
   mqtt.publish("channels/" MQTT_CHANNEL_ID "/publish/" MQTT_CHANNEL_APIKEY, buf);
 }
 
-#endif
