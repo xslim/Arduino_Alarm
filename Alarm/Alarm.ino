@@ -1,9 +1,7 @@
 #include <Arduino.h>
 
-#include <Thread.h>
-#include <ThreadController.h>
-
 #include "Config.h"
+#include "Scheduler.h"
 
 #include "SensorData.h"
 tSensorData sensorData = { 0, 0, 0, 0 };
@@ -12,17 +10,14 @@ String gsmOperator = "";
 
 #if DHT_ENABLED
 #include "DHTThread.h"
-DHTThread dhtThread = DHTThread();
 #endif
 
 #if FONA_ENABLED
 #include "MQTTThread.h"
-MQTTThread mqttThread = MQTTThread();
 #endif
 
 #if DISPLAY_ENABLED
 #include "Display.h"
-DisplayThread displayThread = DisplayThread();
 #endif
 
 #if RFID_ENABLED
@@ -30,7 +25,7 @@ DisplayThread displayThread = DisplayThread();
 RFIDThread rfidThread = RFIDThread();
 #endif
 
-ThreadController controller = ThreadController();
+//ThreadController controller = ThreadController();
 
 void setup() {
   // put your setup code here, to run once:
@@ -42,6 +37,8 @@ void setup() {
   DEBUG_PRINTLN("Initializing");
 #endif
 
+  scheduler_setup(millis());
+
 #if DISPLAY_ENABLED
 //  pinMode(BUTTON_A, INPUT_PULLUP);
 //  pinMode(BUTTON_B, INPUT_PULLUP);
@@ -49,22 +46,25 @@ void setup() {
 #endif
 
 #if DISPLAY_ENABLED
-  displayThread.setup();
-  displayThread.setInterval(1000);
-  controller.add(&displayThread);
+  setup_display();
+  scheduler_add(&update_display, 1000);
 #endif
 
 #if DHT_ENABLED
-  dhtThread.setup();
-  dhtThread.setInterval(5000);
-  controller.add(&dhtThread);
+  setup_dst();
+  scheduler_add(&update_dht_dst, 5000);
+#endif
+
+#if FONA_ENABLED
+  setup_fona();
+  scheduler_add(&update_fona, MQTT_POSTING_INTERVAL);
+#endif
+
+#if MQTT_ENABLED
+  setup_mqtt();
+  scheduler_add(&update_mqtt, MQTT_POSTING_INTERVAL);
 #endif
   
-#if FONA_ENABLED
-  mqttThread.setup();
-  mqttThread.setInterval(MQTT_POSTING_INTERVAL);
-  controller.add(&mqttThread);
-#endif
 
 #if RFID_ENABLED
     rfidThread.setup();
@@ -81,5 +81,5 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
 
-  controller.run();
+  scheduler_update(millis());
 }
