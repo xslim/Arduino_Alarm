@@ -1,5 +1,3 @@
-#if DST_ENABLED
-
 #include <OneWire.h>
 OneWire oneWire(ONE_WIRE_BUS);
 
@@ -22,7 +20,7 @@ bool dst_search(OneWire* wire, uint8_t* addr) {
   return true;
 }
 
-//sprintf(str, "String value: %d.%02d", (int)f, (int)(f*100)%100);
+
 int8_t dst_getTemp(OneWire* wire, const uint8_t *addr) {
   byte type_s;
   byte data[2]; //byte data[12];
@@ -47,7 +45,7 @@ int8_t dst_getTemp(OneWire* wire, const uint8_t *addr) {
   wire->select(addr);
   wire->write(0x44); //wire.write(0x44, 1);        // start conversion, with parasite power on at the end
   
-  delay(1000);     // maybe 750ms is enough, maybe not
+  delay(800);     // maybe 750ms is enough, maybe not
   // we might do a ds.depower() here, but the reset will take care of it.
   
   wire->reset();
@@ -87,6 +85,7 @@ int8_t dst_getTemp(OneWire* wire, const uint8_t *addr) {
   // sensor defaults to a reading of 85 if you read it too soon after a reset!
 
   //celsius = (float)raw / 16.0;
+  //DEBUG_PRINTLN("DST raw "+String(raw));
   return raw / 16;
 }
 
@@ -105,5 +104,3 @@ void sleep_1s() {
 //  sleep_disable(); // cancel sleep after wakeup as a precaution
 }
 
-
-#endif

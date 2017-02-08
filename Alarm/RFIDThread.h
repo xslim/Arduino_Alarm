@@ -1,6 +1,3 @@
-
-#if RFID_ENABLED
-
 #include <SPI.h>
 #include <MFRC522.h>
 
@@ -48,7 +45,3 @@ public:
   }
   
 };
-
-
-
-#endif

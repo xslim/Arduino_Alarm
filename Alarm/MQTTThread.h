@@ -1,30 +1,27 @@
 
-
 #define TINY_GSM_MODEM_SIM800
 #include <TinyGsmClient.h>
 #include <SoftwareSerial.h>
 
-#include <PubSubClient.h>
-
 SoftwareSerial fonaSS(FONA_TX, FONA_RX);
 TinyGsm gsmModem(fonaSS);
 TinyGsmClient netClient(gsmModem);
+
+#if MQTT_ENABLED
+#include <PubSubClient.h>
 PubSubClient mqtt(netClient);
+#endif
 
 class MQTTThread: public Thread {
 public:
 
   void run(){    
-    // Check if MQTT client has connected else reconnect
-    if (!mqtt.connected()) {
-      reconnect();
-    }
-    // Call the loop continuously to establish connection to the server
-    mqtt.loop();
-
+    
     getBattVoltage();
     
-    mqttpublish();
+#if MQTT_ENABLED
+    mqtt_loop();
+#endif
     
     runned();
   }
@@ -33,74 +30,88 @@ public:
     fonaSS.begin(4800);
     delay(3000);
     
-    Serial.println("Initializing modem...");
+    DEBUG_PRINTLN("Initializing modem...");
     gsmModem.restart();
 
-    Serial.print("Waiting for network...");
+    DEBUG_PRINTLN("Waiting for network...");
     if (!gsmModem.waitForNetwork()) {
-      Serial.println(" fail");
+      DEBUG_PRINTLN(" fail");
       while (true);
     }
-    Serial.println(" OK");
+    DEBUG_PRINTLN(" OK");
   
-    Serial.print("Connecting to APN");
+    DEBUG_PRINTLN("Connecting to APN");
     if (!gsmModem.gprsConnect(FONA_APN, FONA_USERNAME, FONA_PASSWORD)) {
-      Serial.println(" fail");
+      DEBUG_PRINTLN(" fail");
       while (true);
     }
-    Serial.println(" OK");
+    DEBUG_PRINTLN(" OK");
     
     getBattVoltage();
-  
+
+#if MQTT_ENABLED
+    mqtt_setup();
+#endif
+  }
+
+  void getBattVoltage() {
+    gsmOperator = gsmModem.getOperator();
+    sensorData.batt = gsmModem.getBattVoltage() / 100;
+    
+    DEBUG_PRINTLN(gsmOperator);
+    DEBUG_PRINTLN(sensorData.batt);
+  }
+
+#if MQTT_ENABLED
+  void mqtt_setup() {
     // MQTT Broker setup
     mqtt.setServer(MQTT_SERVER, 1883);
     //mqtt.setCallback(mqttCallback);
   }
 
-  void getBattVoltage() {
-    //uint16_t v = gsmModem.getBattVoltage();
-    //sensorData.batt = v/1000.0;
+  void mqtt_loop() {
+    // Check if MQTT client has connected else reconnect
+    if (!mqtt.connected()) {
+      mqtt_reconnect();
+    }
+    // Call the loop continuously to establish connection to the server
+    mqtt.loop();
+    
+    mqtt_publish();
   }
 
-  void reconnect() {
+  void mqtt_reconnect() {
     // Loop until we're reconnected
     while (!mqtt.connected())  {
-      Serial.print("Attempting MQTT connection...");
+      DEBUG_PRINTLN("Attempting MQTT connection...");
       // Connect to the MQTT broker
       if (mqtt.connect("xxx"))  {
-        Serial.println("connected");
+        DEBUG_PRINTLN("connected");
       } else {
-        Serial.print("failed, rc=");
+        DEBUG_PRINT("failed, rc=");
         // Print to know why the connection failed
         // See http://pubsubclient.knolleary.net/api.html#state for the failure code and its reason
-        Serial.print(mqtt.state());
-        Serial.println(" try again in 5 seconds");
+        DEBUG_PRINTLN(mqtt.state());
+        DEBUG_PRINTLN(" try again in 5 seconds");
         // Wait 5 seconds before retrying to connect again
         delay(5000);
       }
     }
   }
 
-  void mqttpublish() {
-
+  void mqtt_publish() {
     if (sensorData.hum == 0) {
       return;
     }
 
     // Create data string to send to ThingSpeak
-    String data = String("field1=" + String(sensorData.temp) 
-                      + "&field2=" + String(sensorData.hum) 
-                      + "&field3=" + String(sensorData.outTemp) 
-                      + "&field4=" + String(sensorData.batt, 2));
-    // Get the data string length
-    int length = data.length();
-    char msgBuffer[length];
-    // Convert data string to character buffer
-    data.toCharArray(msgBuffer,length+1);
-    Serial.println(msgBuffer);
+    char buf[50];
+    int n = sprintf(buf, "field1=%d&field2=%d&field3=%d&field4=%d.%d", 
+      sensorData.temp, sensorData.hum, sensorData.outTemp,
+      (sensorData.batt / 10), (sensorData.batt % 10));
 
-    mqtt.publish("channels/" MQTT_CHANNEL_ID "/publish/" MQTT_CHANNEL_APIKEY, msgBuffer);
+    mqtt.publish("channels/" MQTT_CHANNEL_ID "/publish/" MQTT_CHANNEL_APIKEY, buf);
   }
-  
+#endif
 };
 

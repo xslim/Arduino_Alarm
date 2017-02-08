@@ -5,7 +5,7 @@
 
 //#define DEBUG
 
-#define DISPLAY_ENABLED 0
+#define DISPLAY_ENABLED 1
 #define RFID_ENABLED 0
 #define DHT_ENABLED 1
 #define DST_ENABLED 1
@@ -66,14 +66,12 @@
   #define ONE_WIRE_BUS 12
 #endif
 
-//#ifdef DEBUG 
-// #define DEBUG_PRINT(x)    Serial.print (x)
-// #define DEBUG_PRINTDEC(x) Serial.print (x, DEC)
-// #define DEBUG_PRINTLN(x)  Serial.println (x)
-//#else
-// #define DEBUG_PRINT(x)
-// #define DEBUG_PRINTDEC(x)
-// #define DEBUG_PRINTLN(x) 
-//#endif
+#ifdef DEBUG 
+ #define DEBUG_PRINT(x)    Serial.print (x)
+ #define DEBUG_PRINTLN(x)  Serial.println (x)
+#else
+ #define DEBUG_PRINT(x)
+ #define DEBUG_PRINTLN(x) 
+#endif
 
 #endif

@@ -6,18 +6,16 @@
 #include "Config.h"
 
 #include "SensorData.h"
-tSensorData sensorData;
+tSensorData sensorData = { 0, 0, 0, 0 };
 
-
-
-
+String gsmOperator = "";
 
 #if DHT_ENABLED
 #include "DHTThread.h"
 DHTThread dhtThread = DHTThread();
 #endif
 
-#if MQTT_ENABLED
+#if FONA_ENABLED
 #include "MQTTThread.h"
 MQTTThread mqttThread = MQTTThread();
 #endif
@@ -37,15 +35,17 @@ ThreadController controller = ThreadController();
 void setup() {
   // put your setup code here, to run once:
   delay(500);
-//#ifdef DEBUG
+
+#ifdef DEBUG
   Serial.begin(115200);
-//#endif
- // DEBUG_PRINTLN("Initializing");
+  while (!Serial);
+  DEBUG_PRINTLN("Initializing");
+#endif
 
 #if DISPLAY_ENABLED
-  pinMode(BUTTON_A, INPUT_PULLUP);
-  pinMode(BUTTON_B, INPUT_PULLUP);
-  pinMode(BUTTON_C, INPUT_PULLUP);
+//  pinMode(BUTTON_A, INPUT_PULLUP);
+//  pinMode(BUTTON_B, INPUT_PULLUP);
+//  pinMode(BUTTON_C, INPUT_PULLUP);
 #endif
 
 #if DISPLAY_ENABLED
@@ -60,7 +60,7 @@ void setup() {
   controller.add(&dhtThread);
 #endif
   
-#if MQTT_ENABLED
+#if FONA_ENABLED
   mqttThread.setup();
   mqttThread.setInterval(MQTT_POSTING_INTERVAL);
   controller.add(&mqttThread);
@@ -72,7 +72,7 @@ void setup() {
     controller.add(&rfidThread);
 #endif
 
-//  DEBUG_PRINTLN("Running");
+  DEBUG_PRINTLN("Running");
   delay(500);
 }
 
