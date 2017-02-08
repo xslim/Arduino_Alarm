@@ -109,8 +109,8 @@ public:
     int n = sprintf(buf, "field1=%d&field2=%d&field3=%d&field4=%d.%d", 
       sensorData.temp, sensorData.hum, sensorData.outTemp,
       (sensorData.batt / 10), (sensorData.batt % 10));
-
-    mqtt.publish("channels/" MQTT_CHANNEL_ID "/publish/" MQTT_CHANNEL_APIKEY, buf);
+    DEBUG_PRINTLN(buf);
+    mqtt.publish("channels/" MQTT_CHANNEL_ID "/publish/" MQTT_CHANNEL_APIKEY, buf, n);
   }
 #endif
 };
