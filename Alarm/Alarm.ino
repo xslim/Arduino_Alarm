@@ -7,7 +7,7 @@
 #include "SensorData.h"
 tSensorData sensorData = { 0, 0, 0, 0 };
 
-String gsmOperator = "";
+
 
 #if DHT_ENABLED
 #include "dht_dst.h"
@@ -22,6 +22,7 @@ String gsmOperator = "";
 #endif
 
 #if DISPLAY_ENABLED
+String gsmOperator = "";
 #include "display.h"
 #endif
 
@@ -33,7 +34,7 @@ void setup() {
 
 #ifdef DEBUG
   Serial.begin(115200);
-  while (!Serial);
+  //while (!Serial);
   DEBUG_PRINTLN("Initializing");
 #endif
 
@@ -52,20 +53,20 @@ void setup() {
 
 #if DHT_ENABLED
   setup_dst();
+  setup_dht();
   scheduler_add(&update_dht, 2000);
   scheduler_add(&update_dst, 2000);
 #endif
 
 #if FONA_ENABLED
   setup_fona();
-  scheduler_add(&update_fona, MQTT_POSTING_INTERVAL);
-#endif
+//  scheduler_add(&update_fona, MQTT_POSTING_INTERVAL);
 
 #if MQTT_ENABLED
   setup_mqtt();
   scheduler_add(&update_mqtt, MQTT_POSTING_INTERVAL);
 #endif
-  
+#endif
 
 #if RFID_ENABLED
     rfidThread.setup();

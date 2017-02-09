@@ -32,10 +32,13 @@ void setup_fona(){
 }
 
 void update_fona(SchedulerTimer *timer) {
+#if DISPLAY_ENABLED
   gsmOperator = gsmModem.getOperator();
+#endif
+
   sensorData.batt = gsmModem.getBattVoltage() / 100;
   
-  DEBUG_PRINTLN(gsmOperator);
-  DEBUG_PRINTLN(sensorData.batt);
+  //DEBUG_PRINTLN(gsmOperator);
+  //DEBUG_PRINTLN(sensorData.batt);
 }
 

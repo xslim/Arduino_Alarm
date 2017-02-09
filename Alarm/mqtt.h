@@ -1,18 +1,22 @@
 
 
 #include <PubSubClient.h>
-PubSubClient mqtt(netClient);
+PubSubClient mqtt;
 
 void mqtt_reconnect();
 void mqtt_publish();
 
 void setup_mqtt() {
+  mqtt.setClient(netClient);
   // MQTT Broker setup
   mqtt.setServer(MQTT_SERVER, 1883);
   //mqtt.setCallback(mqttCallback);
 }
 
 void update_mqtt(SchedulerTimer *timer) {
+
+  update_fona(NULL);
+  
   // Check if MQTT client has connected else reconnect
     if (!mqtt.connected()) {
       mqtt_reconnect();
@@ -28,7 +32,7 @@ void mqtt_reconnect() {
   while (!mqtt.connected())  {
     DEBUG_PRINTLN("Attempting MQTT connection...");
     // Connect to the MQTT broker
-    if (mqtt.connect("xxx"))  {
+    if (mqtt.connect("X"))  {
       DEBUG_PRINTLN("connected");
     } else {
       DEBUG_PRINT("failed, rc=");
@@ -51,7 +55,7 @@ void mqtt_publish() {
   int n = sprintf(buf, "field1=%d&field2=%d&field3=%d&field4=%d.%d", 
     sensorData.temp, sensorData.hum, sensorData.outTemp,
     (sensorData.batt / 10), (sensorData.batt % 10));
-  DEBUG_PRINTLN(buf);
+  //DEBUG_PRINTLN(buf);
   mqtt.publish("channels/" MQTT_CHANNEL_ID "/publish/" MQTT_CHANNEL_APIKEY, buf);
 }
 

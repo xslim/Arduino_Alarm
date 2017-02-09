@@ -14,6 +14,8 @@ void update_dht(SchedulerTimer *timer) {
     sensorData.hum  = dht.humidity;
   } else if (res > 0) {
     scheduler_reset_timeout(timer, res);
+  } else {
+    DEBUG_PRINTLN("res " + String(res));
   }
 }
 

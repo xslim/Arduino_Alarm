@@ -28,7 +28,7 @@ SchedulerTimer * scheduler_get_free_timer() {
     }
     return NULL;
 }
-SchedulerTimer *scheduler_add(scheduler_thread_callback_t callback_fnc, uint16_t timeout) {
+SchedulerTimer *scheduler_add(scheduler_thread_callback_t callback_fnc, unsigned long timeout) {
     SchedulerTimer *timer = scheduler_get_free_timer();
     if (!timer) {
         return NULL;
@@ -44,7 +44,7 @@ SchedulerTimer *scheduler_add(scheduler_thread_callback_t callback_fnc, uint16_t
     return timer;
 }
 
-void scheduler_reset_timeout(SchedulerTimer * timer, uint16_t timeout) {
+void scheduler_reset_timeout(SchedulerTimer * timer, unsigned long timeout) {
     timer->timeout = (timeout > 0) ? timeout : timer->initialTimeout;
 }
 

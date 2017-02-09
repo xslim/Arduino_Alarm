@@ -1,6 +1,8 @@
 #ifndef _SensorData_H_
 #define _SensorData_H_
 
+
+
 typedef struct  {
 
   int8_t temp, outTemp;
@@ -9,5 +11,11 @@ typedef struct  {
   bool locked;
   
 } tSensorData;
+
+//tSensorData sensorData;
+//
+//void sensordata_setup() {
+//  sensorData.temp
+//}
 
 #endif

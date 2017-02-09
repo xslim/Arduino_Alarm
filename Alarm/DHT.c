@@ -160,6 +160,7 @@ int8_t dht_readSensor(uint8_t pin, uint8_t wakeupDelay, uint8_t leadingZeroBits,
 int8_t dht_setup(DHT* sensor, uint8_t pin, uint8_t type) {
   sensor->pin = pin;
   sensor->type = type;
+  sensor->state |= DHT_INITIALIZED;
 
 //  #ifdef __AVR
 //    sensor->_bit = digitalPinToBitMask(pin);
@@ -190,7 +191,7 @@ uint8_t dht_read_value(DHT* sensor) {
 int16_t dht_update(DHT* sensor) {
     
     if (!(sensor->state & DHT_INITIALIZED)) {
-        return DHTLIB_ERROR_CONNECT;
+        return DHTLIB_ERROR;
     }
 
     if (sensor->type == DHT11) {
@@ -198,7 +199,7 @@ int16_t dht_update(DHT* sensor) {
     } else if (sensor->type == DHT22) {
       return dht_read22(sensor);
     }
-    return DHTLIB_ERROR_CONNECT;
+    return DHTLIB_ERROR;
     
 //    if (sensor->state & DHT_REQUESTED) {
 //        dst_read_value(sensor, temperature, humidity);

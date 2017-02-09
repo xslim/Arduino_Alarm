@@ -23,7 +23,7 @@ typedef void(*scheduler_thread_callback_t)(SchedulerTimer *timer);
 
 struct SchedulerTimer{
     unsigned long time;
-    uint16_t timeout;
+    unsigned long timeout;
     uint8_t flags;
     uint16_t initialTimeout;
     scheduler_thread_callback_t callback;
@@ -32,8 +32,8 @@ struct SchedulerTimer{
 
 void scheduler_setup(unsigned long time);
 void scheduler_update(unsigned long time);
-void scheduler_reset_timeout(SchedulerTimer * timer, uint16_t timeout);
-SchedulerTimer *scheduler_add(scheduler_thread_callback_t callback_fnc, uint16_t timeout);
+void scheduler_reset_timeout(SchedulerTimer * timer, unsigned long timeout);
+SchedulerTimer *scheduler_add(scheduler_thread_callback_t callback_fnc, unsigned long timeout);
 
 #ifdef __cplusplus
 }

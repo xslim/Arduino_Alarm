@@ -11,7 +11,7 @@ void setup_display() {
   
   u8x8.begin();
   u8x8.setFont(u8x8_font_chroma48medium8_r);
-  u8x8.drawString(0,0,"Initializing...");
+  u8x8.drawString(0,0,"Initializing");
   //u8x8.refreshDisplay();    // for SSD1606  
   //u8x8.clear();
 
