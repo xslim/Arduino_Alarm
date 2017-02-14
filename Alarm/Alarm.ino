@@ -22,7 +22,6 @@ tSensorData sensorData = { 0, 0, 0, 0 };
 #endif
 
 #if DISPLAY_ENABLED
-String gsmOperator = "";
 #include "display.h"
 #endif
 

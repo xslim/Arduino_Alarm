@@ -15,16 +15,23 @@ void setup_mqtt() {
 
 void update_mqtt(SchedulerTimer *timer) {
 
+  if (sensorData.hum == 0) {
+    return;
+  }
+  
+  fona_wakeup();
   update_fona(NULL);
   
   // Check if MQTT client has connected else reconnect
-    if (!mqtt.connected()) {
-      mqtt_reconnect();
-    }
-    // Call the loop continuously to establish connection to the server
-    mqtt.loop();
-    
-    mqtt_publish();
+  if (!mqtt.connected()) {
+    mqtt_reconnect();
+  }
+  // Call the loop continuously to establish connection to the server
+  mqtt.loop();
+  
+  mqtt_publish();
+  
+  fona_sleap();
 }
 
 void mqtt_reconnect() {

@@ -29,7 +29,7 @@ void update_display(SchedulerTimer *timer) {
     (sensorData.batt / 10), (sensorData.batt % 10));
     
   u8x8.println(buf);
-  u8x8.println(gsmOperator);
+//  u8x8.println(gsmOperator);
   
 //    u8x8.println("T: " + String(sensorData.temp) + "C H: " + String(sensorData.hum) + "%");
 //    u8x8.println("T2: " + String(sensorData.outTemp) + "C");

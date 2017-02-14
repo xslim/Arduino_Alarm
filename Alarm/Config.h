@@ -3,9 +3,9 @@
 
 #include "private.h"
 
-//#define DEBUG
+#define DEBUG
 
-#define DISPLAY_ENABLED 0
+#define DISPLAY_ENABLED 1
 #define RFID_ENABLED 0
 #define DHT_ENABLED 1
 #define DST_ENABLED 1
@@ -62,8 +62,8 @@
   #define FONA_RX  9
   #define FONA_TX  8
   #define FONA_RST 4
-  #define DHT_PIN      11
-  #define ONE_WIRE_BUS 12
+  #define DHT_PIN      12
+  #define ONE_WIRE_BUS 13
 #endif
 
 #ifdef DEBUG 
