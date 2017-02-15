@@ -2,6 +2,8 @@
 
 #include "config.h"
 
+void led_blink(uint8_t num);
+
 #include "Scheduler.h"
 
 #include "SensorData.h"
@@ -31,6 +33,9 @@ tSensorData sensorData = { 0, 0, 0, 0 };
 
 void setup() {
 
+  // initialize digital pin LED_BUILTIN as an output.
+  pinMode(LED_BUILTIN, OUTPUT);
+
 #ifdef DEBUG
   Serial.begin(115200);
   //while (!Serial);
@@ -38,6 +43,8 @@ void setup() {
 #endif
 
   scheduler_setup(millis());
+
+  led_blink(3);
 
 #if DISPLAY_ENABLED
 //  pinMode(BUTTON_A, INPUT_PULLUP);
@@ -53,8 +60,8 @@ void setup() {
 #if DHT_ENABLED
   setup_dst();
   setup_dht();
-  scheduler_add(&update_dht, 2000);
-  scheduler_add(&update_dst, 2000);
+  scheduler_add(&update_dht, DST_INTERVAL);
+  scheduler_add(&update_dst, DST_INTERVAL);
 #endif
 
 #if FONA_ENABLED
@@ -74,6 +81,7 @@ void setup() {
 #endif
 
   DEBUG_PRINTLN("Running");
+  led_blink(3);
 }
 
 
@@ -99,3 +107,12 @@ void loop() {
 //  sleep_cpu ();
 //  sleep_disable(); // cancel sleep after wakeup as a precaution
 //}
+
+void led_blink(uint8_t num) {
+  for (uint8_t i = num; i != 0; --i) {
+    digitalWrite(LED_BUILTIN, HIGH);
+    delay(200);
+    digitalWrite(LED_BUILTIN, LOW);
+    delay(200);
+  }
+}

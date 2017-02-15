@@ -8,6 +8,7 @@ DST dst;
 OneWire oneWire(ONE_WIRE_BUS);
 
 void update_dht(SchedulerTimer *timer) {
+  led_blink(1);
   int16_t res = dht_update(&dht);
   if (res == DHTLIB_OK) {
     sensorData.temp = dht.temperature;
@@ -24,6 +25,7 @@ void setup_dht() {
 }
 
 void update_dst(SchedulerTimer *timer) {
+  led_blink(1);
   uint16_t newTimeout = dst_update(&dst, &oneWire, &sensorData.outTemp);
   scheduler_reset_timeout(timer, newTimeout);
   

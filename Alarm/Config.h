@@ -3,13 +3,14 @@
 
 #include "private.h"
 
-#define DEBUG
+//#define DEBUG
 
-#define DISPLAY_ENABLED 1
+#define DISPLAY_ENABLED 0
 #define RFID_ENABLED 0
 #define DHT_ENABLED 1
 #define DST_ENABLED 1
 
+#define DST_INTERVAL 300000UL
 
 #define MQTT_ENABLED 1
 #define FONA_ENABLED 1
@@ -21,7 +22,7 @@
 #define FONA_PASSWORD  ""
 
 #define MQTT_SERVER "mqtt.thingspeak.com"
-#define MQTT_POSTING_INTERVAL 300000UL
+#define MQTT_POSTING_INTERVAL 600000UL
 #define MQTT_CHANNEL_ID "189404"
 
 #ifndef MQTT_CHANNEL_APIKEY
@@ -62,8 +63,8 @@
   #define FONA_RX  9
   #define FONA_TX  8
   #define FONA_RST 4
-  #define DHT_PIN      12
-  #define ONE_WIRE_BUS 13
+  #define DHT_PIN      11
+  #define ONE_WIRE_BUS 12
 #endif
 
 #ifdef DEBUG 

@@ -30,6 +30,8 @@ void update_mqtt(SchedulerTimer *timer) {
   mqtt.loop();
   
   mqtt_publish();
+
+  led_blink(2);
   
   fona_sleap();
 }
