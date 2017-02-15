@@ -28,7 +28,7 @@ SchedulerTimer * scheduler_get_free_timer() {
     }
     return NULL;
 }
-SchedulerTimer *scheduler_add(scheduler_thread_callback_t callback_fnc, unsigned long timeout) {
+SchedulerTimer *scheduler_add(scheduler_thread_callback_t callback_fnc, unsigned long timeout, uint8_t now) {
     SchedulerTimer *timer = scheduler_get_free_timer();
     if (!timer) {
         return NULL;
@@ -37,7 +37,8 @@ SchedulerTimer *scheduler_add(scheduler_thread_callback_t callback_fnc, unsigned
     timer->timeout = timeout;
     timer->initialTimeout = timeout;
     timer->flags = SCHEDULER_TIMER_ENABLED | SCHEDULER_TIMER_AUTORESET;
-    timer->time = scheduler.time;
+
+    timer->time = (now) ? scheduler.time + timeout : scheduler.time;
     
     // Unset
     //timer->flags &= ~FLAG_TIMER_ENABLED;

@@ -33,7 +33,7 @@ struct SchedulerTimer{
 void scheduler_setup(unsigned long time);
 void scheduler_update(unsigned long time);
 void scheduler_reset_timeout(SchedulerTimer * timer, unsigned long timeout);
-SchedulerTimer *scheduler_add(scheduler_thread_callback_t callback_fnc, unsigned long timeout);
+SchedulerTimer *scheduler_add(scheduler_thread_callback_t callback_fnc, unsigned long timeout, uint8_t now);
 
 #ifdef __cplusplus
 }

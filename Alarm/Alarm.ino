@@ -54,14 +54,14 @@ void setup() {
 
 #if DISPLAY_ENABLED
   setup_display();
-  scheduler_add(&update_display, 1000);
+  scheduler_add(&update_display, 1000, false);
 #endif
 
 #if DHT_ENABLED
   setup_dst();
   setup_dht();
-  scheduler_add(&update_dht, DST_INTERVAL);
-  scheduler_add(&update_dst, DST_INTERVAL);
+  scheduler_add(&update_dht, DST_INTERVAL, true);
+  scheduler_add(&update_dst, DST_INTERVAL, true);
 #endif
 
 #if FONA_ENABLED
@@ -70,7 +70,7 @@ void setup() {
 
 #if MQTT_ENABLED
   setup_mqtt();
-  scheduler_add(&update_mqtt, MQTT_POSTING_INTERVAL);
+  scheduler_add(&update_mqtt, MQTT_POSTING_INTERVAL, true);
 #endif
 #endif
 

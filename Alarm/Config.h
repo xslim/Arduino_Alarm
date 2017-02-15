@@ -5,7 +5,7 @@
 
 //#define DEBUG
 
-#define DISPLAY_ENABLED 0
+#define DISPLAY_ENABLED 1
 #define RFID_ENABLED 0
 #define DHT_ENABLED 1
 #define DST_ENABLED 1
